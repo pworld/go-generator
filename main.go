@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 type ModelField struct {
@@ -15,6 +16,7 @@ type ModelField struct {
 	Type string
 }
 
+// ------------START Validations
 // parseModelFile reads a Go source file and extracts model fields.
 func parseModelFile(filePath string) ([]ModelField, error) {
 	fset := token.NewFileSet()
@@ -76,6 +78,9 @@ func getTypeAsString(expr ast.Expr) string {
 func generateValidationFunctions(modelName string, fields []ModelField) string {
 	var validations []string
 
+	// Start with the package declaration
+	validations = append(validations, "package model")
+
 	for _, field := range fields {
 		validation := generateValidationForField(modelName, field)
 		if validation != "" {
@@ -90,9 +95,9 @@ func generateValidationFunctions(modelName string, fields []ModelField) string {
 func generateValidationForField(modelName string, field ModelField) string {
 	switch field.Type {
 	case "string":
-		return fmt.Sprintf("func validate%s%s(value string) bool {\n    return len(value) > 0\n}", modelName, field.Name)
+		return fmt.Sprintf("func Validate%s%s(value string) bool {\n    return len(value) > 0\n}", modelName, field.Name)
 	case "int":
-		return fmt.Sprintf("func validate%s%s(value int) bool {\n    return value >= 0\n}", modelName, field.Name)
+		return fmt.Sprintf("func Validate%s%s(value int) bool {\n    return value >= 0\n}", modelName, field.Name)
 	// Add more cases for different types
 	default:
 		return ""
@@ -115,14 +120,106 @@ func extractModelName(filePath string) string {
 	return strings.TrimSuffix(base, filepath.Ext(base))
 }
 
-func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("Usage: go run main.go <path-to-model-file>")
-		os.Exit(1)
+// ------------END Validations
+
+// ------------ Controller
+func toTitleCase(str string) string {
+	if str == "" {
+		return ""
 	}
+	r := []rune(str)
+	return string(unicode.ToUpper(r[0])) + strings.ToLower(string(r[1:]))
+}
+
+func generateController(modelName string) string {
+	modelNameCapitalized := toTitleCase(modelName) // Replacing strings.Title with our function
+	// ... rest of your generateController function ...
+
+	return fmt.Sprintf(
+		`package controllers
+
+import (
+    "github.com/gofiber/fiber/v2"
+    "model/user" 
+)
+
+type UserController struct {
+    // DB CON
+}
+
+// NewUserController creates a new UserController instance.
+func NewUserController() *UserController {
+    return &UserController{
+        // Initialize dependencies here
+    }
+}
+
+// CreateUser handles POST requests to create a new user.
+func (uc *UserController) CreateUser(c *fiber.Ctx) error {
+    user := new(models.User)
+    if err := c.BodyParser(user); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+    }
+
+    // Logic to save user
+    // ...
+
+    return c.Status(fiber.StatusCreated).JSON(user)
+}
+
+// GetUser handles GET requests to retrieve a user by ID.
+func (uc *UserController) GetUser(c *fiber.Ctx) error {
+    id := c.Params("id")
+    
+    // Logic to retrieve the user from the database using id
+
+    user := &models.User{ID: 1, Fullname: "John Doe", Email: "john@example.com"}
+
+    return c.JSON(user)
+}
+
+// UpdateUser handles PUT requests to update a user.
+func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
+    id := c.Params("id")
+
+    user := new(models.User)
+    if err := c.BodyParser(user); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+    }
+
+    // Logic update user in the database 
+
+
+    return c.JSON(user)
+}
+
+// DeleteUser handles DELETE requests to delete a user.
+func (uc *UserController) DeleteUser(c *fiber.Ctx) error {
+    id := c.Params("id")
+
+    // Logic delete the user from the database
+
+    return c.SendString("User successfully deleted")
+}
+`,
+		modelNameCapitalized, modelName, modelNameCapitalized, modelNameCapitalized, modelNameCapitalized,
+		modelNameCapitalized, modelNameCapitalized, modelName, modelName)
+}
+
+// ------------ END Controller
+
+func main() {
+	// if len(os.Args) != 2 {
+	// 	fmt.Println("Usage: go run main.go <path-to-model-file>")
+	// 	os.Exit(1)
+	// }
 
 	//modelPath := os.Args[1]
-	modelPath := "model/User.go"
+	path := "model/user/"
+	NameFile := "user.go"
+
+	modelPath := filepath.Join(path, NameFile)
+
 	modelName := extractModelName(modelPath) // Implement this function to extract model name from file path
 
 	fields, err := parseModelFile(modelPath)
@@ -131,9 +228,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	// ------------ Validations
 	validations := generateValidationFunctions(modelName, fields)
 
-	directory := "./model_validations"
+	directory := "./model/user"
 	filename := strings.ToLower(modelName) + "_validations.go"
 
 	if err := writeToFile(directory, filename, validations); err != nil {
@@ -142,4 +240,19 @@ func main() {
 	}
 
 	fmt.Printf("Validation functions for model '%s' have been written to %s/%s\n", modelName, directory, filename)
+	// ------------END Validations
+
+	// ------------ Controller
+	// Generate and write the controller file
+	controllerContent := generateController(modelName)
+	controllerDir := "./controllers"
+	controllerFilename := strings.ToLower(modelName) + "_controller.go"
+
+	if err := writeToFile(controllerDir, controllerFilename, controllerContent); err != nil {
+		fmt.Printf("Error writing controller file: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Controller for model '%s' has been written to %s/%s\n", modelName, controllerDir, controllerFilename)
+	// ------------ END Controller
 }
