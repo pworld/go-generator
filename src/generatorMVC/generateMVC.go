@@ -36,7 +36,7 @@ func GenerateMVC(filePath string) {
 	// Generate the controller file
 	writeControllerFileContent(filePath, structName, fields)
 	// Generate the Service file
-	//writeServiceFileContent(filePath, structName)
+	writeServiceFileContent(filePath, structName, fields)
 	//// Generate the Persistence file
 	//writePersistenceFileContent(filePath,structName)
 	//// Generate the View file
@@ -104,51 +104,6 @@ func getModuleName(modFilePath string) (string, error) {
 
 	return "", fmt.Errorf("module directive not found in %s", modFilePath)
 }
-
-//func writeServiceFileContent(filepath, structName string) {
-//	lowerStructName := strings.ToLower(structName)
-//
-//	// Calculate the directory path for the controller
-//	baseDir := filepath.Dir(filepath.Dir(filePath)) // Move two directories up
-//	servicesDir := filepath.Join(baseDir, "services")
-//	serviceFileName := fmt.Sprintf("%s_service.go", lowerStructName)
-//	serviceFilePath := fmt.Sprintf("services/%s", serviceFileName)
-//
-//	// Ensure the directory exists
-//	if err := os.MkdirAll(servicesDir, os.ModePerm); err != nil {
-//		fmt.Printf("Failed to create directory: %s\n", err)
-//		return
-//	}
-//
-//	file, err := os.Create(serviceFilePath)
-//	if err != nil {
-//		fmt.Printf("Failed to create controller file: %s\n", err)
-//		return
-//	}
-//	defer file.Close()
-//
-//	// Execute the template with the struct data
-//	tmpl, err := template.New("service").Parse(templateMVC.ServiceTemplate)
-//	if err != nil {
-//		fmt.Println("Error creating template:", err)
-//		return
-//	}
-//
-//	data := struct {
-//		StructName      string
-//		LowerStructName string
-//	}{
-//		StructName:      structName,
-//		LowerStructName: lowerStructName,
-//	}
-//
-//	if err := tmpl.Execute(file, data); err != nil {
-//		fmt.Println("Error executing template:", err)
-//		return
-//	}
-//
-//	fmt.Println("Service file generated:", serviceFilePath)
-//}
 
 // Generates the view file based on the struct name
 func writeViewFileContent(structName string) {

@@ -3,16 +3,16 @@ package templateMVC
 const ControllerTemplate = `package controllers
 
 import (
-"database/sql"
-"github.com/gofiber/fiber/v2"
-"{{.ModuleName}}/helper"
-"{{.ModuleName}}/internal/user/models/entity"
-"{{.ModuleName}}/internal/user/models/repository"
-"{{.ModuleName}}/internal/user/services"
-"{{.ModuleName}}/internal/user/views"
-"math"
-"strconv"
-"time"
+	"database/sql"
+	"github.com/gofiber/fiber/v2"
+	"{{.ModuleName}}/helper"
+	"{{.ModuleName}}/internal/user/models/entity"
+	"{{.ModuleName}}/internal/user/models/repository"
+	"{{.ModuleName}}/internal/user/services"
+	"{{.ModuleName}}/internal/user/views"
+	"math"
+	"strconv"
+	"time"
 )
 
 // {{.StructName}}Controller structure
@@ -37,7 +37,7 @@ func (uc *{{.StructName}}Controller) CreateUser(c *fiber.Ctx) error {
 
 	{{.LowerStructName}}.CreatedAt = time.Now()
 
-	if _, err := uc.{{.LowerStructName}}Service.Register{{.StructName}}(c.Context(), {{.LowerStructName}}); err != nil {
+	if _, err := uc.{{.LowerStructName}}Service.Create{{.StructName}}(c.Context(), {{.LowerStructName}}); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
