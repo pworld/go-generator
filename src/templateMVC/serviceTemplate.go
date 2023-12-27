@@ -4,8 +4,8 @@ const ServiceTemplate = `package services
 
 import (
     "context"
-    "{{.ModuleName}}/internal/user/models/entity"
-    "{{.ModuleName}}/internal/user/models/repository"
+    "{{.ModuleName}}/internal/{{.LowerStructName}}/models/entity"
+    "{{.ModuleName}}/internal/{{.LowerStructName}}/models/repository"
 )
 
 // {{.StructName}}Service interface for {{.LowerStructName}}-related business logic

@@ -9,11 +9,11 @@ import (
 	"text/template"
 )
 
-func writeControllerFileContent(filePath, structName string, fields []StructField) {
+func writeControllerFileContent(filePath, structName, moduleName string, fields []StructField) {
 	lowerStructName := strings.ToLower(structName)
 
 	// Calculate the directory path for the controller
-	baseDir := filepath.Dir(filepath.Dir(filePath)) // Move two directories up
+	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath))) // Move two directories up
 	controllerDir := filepath.Join(baseDir, "controllers")
 	controllerFileName := fmt.Sprintf("%s_controller.go", lowerStructName)
 	controllerFilePath := filepath.Join(controllerDir, controllerFileName)
@@ -35,13 +35,6 @@ func writeControllerFileContent(filePath, structName string, fields []StructFiel
 	tmpl, err := template.New("controller").Parse(templateMVC.ControllerTemplate)
 	if err != nil {
 		fmt.Println("Error creating template:", err)
-		return
-	}
-
-	// Assuming getModuleName extracts the module name from go.mod
-	moduleName, err := getModuleName("go.mod")
-	if err != nil {
-		fmt.Println("Error:", err)
 		return
 	}
 
