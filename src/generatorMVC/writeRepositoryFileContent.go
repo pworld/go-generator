@@ -47,15 +47,15 @@ func writeRepositoryFileContent(filePath, structName, moduleName string, fields 
 	// Generate argument list as a string
 	var argumentParts []string
 	for _, field := range fields {
-		argumentParts = append(argumentParts, "user."+field.Name) // Assuming the variable name is 'user'
+		argumentParts = append(argumentParts, lowerStructName+"."+field.Name)
 	}
 	argumentList := strings.Join(argumentParts, ", ")
 	scanFields := generateScanFields(lowerStructName, fields)
 
 	// generateUpdateQuery
 	updateFields := generateUpdateFields(fields)
-	scanFieldsUpdate := generateUpdateArguments("user", fields)
-	scanFieldsListsUpdate := generateListArguments("user", fields)
+	scanFieldsUpdate := generateUpdateArguments(lowerStructName, fields)
+	scanFieldsListsUpdate := generateListArguments(lowerStructName, fields)
 
 	// Before executing the template
 	fmt.Printf("Debug - scanFieldsUpdate: %s\n", scanFieldsUpdate)

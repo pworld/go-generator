@@ -4,7 +4,7 @@ const ViewsTemplate = `package views
 
 import (
     "github.com/gofiber/fiber/v2"
-    "{{.ModuleName}}/internal/{{.PackagePath}}/models/entity"
+    "{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
 )
 
 // Format{{.StructName}}Details formats the {{.LowerStructName}} data for the response

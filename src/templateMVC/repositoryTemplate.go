@@ -8,7 +8,7 @@ import (
     "errors"
     "{{.ModuleName}}/helper"
     "{{.ModuleName}}/helper/loggers"
-    "{{.ModuleName}}/internal/{{.LowerStructName}}/models/entity"
+    "{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
     "strings"
 )
 

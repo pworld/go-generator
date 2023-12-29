@@ -1,32 +1,25 @@
 package templateMVC
 
-const TestTemplate = `package service_test
+const TestTemplate = `package {{.LowerStructName}}_test
 
 import (
 	"context"
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"{{.ModuleName}}/internal/{{.PackagePath}}/models/entity"
-	"{{.ModuleName}}/internal/{{.PackagePath}}/services"
-	"{{.ModuleName}}/tests/{{.PackagePath}}/mocks"
+	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
+	"{{.ModuleName}}/internal/{{.PackageName}}/services"
+	"{{.ModuleName}}/tests/{{.PackageName}}/mocks"
 )
 
-{{- range .TestCases }}
-func Test{{$.StructName}}Service_{{.FunctionName}}(t *testing.T) {
+{{range .Methods}}
+func Test{{$.StructName}}Service_{{.Name}}(t *testing.T) {
 	mockRepo := new(mocks.Mock{{$.StructName}}Repository)
 	svc := services.New{{$.StructName}}Service(mockRepo)
-
-	// Setup test case specific mock data and expectations
-	{{.SetupMock}}
-
-	// Call the service method
-	{{.ServiceCall}}
-
-	// Assertions and verifications
-	{{.Assertions}}
+	{{.SetupMock -}}
+	{{.TestImplementation -}}
+	{{- .Assertions}}
 	mockRepo.AssertExpectations(t)
 }
-{{- end }}
-
+{{end}}
 `

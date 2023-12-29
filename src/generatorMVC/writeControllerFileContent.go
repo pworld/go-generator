@@ -14,6 +14,7 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 
 	// Calculate the directory path for the controller
 	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath))) // Move two directories up
+	packageName := filepath.Base(baseDir)
 	controllerDir := filepath.Join(baseDir, "controllers")
 	controllerFileName := fmt.Sprintf("%s_controller.go", lowerStructName)
 	controllerFilePath := filepath.Join(controllerDir, controllerFileName)
@@ -42,11 +43,13 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 		ModuleName      string
 		StructName      string
 		LowerStructName string
+		PackageName     string // Make sure this is included
 		Fields          []StructField
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
 		LowerStructName: lowerStructName,
+		PackageName:     packageName,
 		Fields:          fields,
 	}
 

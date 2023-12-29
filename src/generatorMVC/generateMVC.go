@@ -24,6 +24,13 @@ type StructField struct {
 	JsonTag string
 }
 
+type Method struct {
+	Name               string
+	SetupMock          string
+	TestImplementation string
+	Assertions         string
+}
+
 // Main function to generate the MVC structure
 func GenerateMVC(filePath string) {
 	structName, fields, err := parseFileForStruct(filePath)
@@ -38,17 +45,17 @@ func GenerateMVC(filePath string) {
 	}
 	fmt.Println(fields)
 	// Generate the controller file
-	// writeControllerFileContent(filePath, structName, moduleName, fields)
+	writeControllerFileContent(filePath, structName, moduleName, fields)
 	// Generate the Service file
-	// writeServiceFileContent(filePath, structName, moduleName, fields)
+	writeServiceFileContent(filePath, structName, moduleName, fields)
 	// Generate the Repository file
-	// writeRepositoryFileContent(filePath, structName, moduleName, fields)
-	//// Generate the View file
+	writeRepositoryFileContent(filePath, structName, moduleName, fields)
+	// Generate the View file
 	writeViewFileContent(filePath, structName, moduleName, fields)
 	//// Generate the Test file
-	//writeTestFileContent(filePath, structName, moduleName, fields)
-	//// Generate the Mock file
-	//writeMockFileContent(filePath, structName, moduleName, fields)
+	writeTestFileContent(filePath, structName, moduleName, fields)
+	// Generate the Mock file
+	writeMockFileContent(filePath, structName, moduleName, fields)
 }
 
 // Parses the provided Go file and extracts the struct name
