@@ -12,14 +12,29 @@
 Your Go project should follow this structure:
 - Entity files must be located at `models/entity/{model-file}.go`.
 
+## Installation
+```bash
+go get github.com/pworld/go-generator
+```
+
+## Usage
+To generate MVC components, run:
+```bash
+go run main.go --generate-mvc --file path/to/models/entity/{model-file}.go
+```
+
+Replace {model-file}.go with your actual model file name.
+
+## Example
 ### Sample Directory Structures of test
 ```bash
--internal
---user
----models
-----entity
------user.go
+- internal
+  -- user
+    --- models
+      ---- entity
+        ----- user.go
 ```
+
 ### Sample of User File
 ```go
 package entity
@@ -39,24 +54,33 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 ```
-
-## Installation
-```bash
-go get github.com/yourusername/go-generator
-```
-
-## Usage
-To generate MVC components, run:
-```bash
-go run main.go --generate-mvc --file path/to/models/entity/{model-file}.go
-```
-
-Replace {model-file}.go with your actual model file name.
-
-## Example
 ### Usage
 ```bash
 go run main.go --generate-mvc --file internal/user/models/entity/user.go
+```
+
+## Expected Output Structure
+After running go-generator, you can expect the following directory structure and files:
+```base
+- internal
+  -- user
+    --- models
+      ---- entity
+        ----- user.go
+      ---- repository
+        ----- user_repository.go
+    --- services
+      ---- user_service.go
+    --- views
+      ---- user_view.go
+    --- controllers
+      ---- user_controller.go
+    --- tests
+      ---- service_tests
+        ----- user_service_test.go
+      ---- mocks
+        ----- user_mock.go
+
 ```
 
 ## Contributing
