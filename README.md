@@ -13,21 +13,44 @@ Your Go project should follow this structure:
 - Entity files must be located at `internal/{package-name}/models/entity/{model-file}.go`.
 - *internal* Directory is necessary and can't be change
 
-## Installation
-```bash
-go get github.com/pworld/go-generator
-```
-
+## Installation Guide:
+1. Download the Binary:
+Go to the [Releases page](https://github.com/pworld/go-generator/releases/tag/v.1.0.2) of the go-generator repository. 
+2. Download the binary for your operating system (go-generator.exe for Windows, go-generator-macos for macOS, go-generator-linux for Linux).
+Make the Binary Executable (Linux/macOS):
+3. On Linux or macOS, you might need to make the binary executable. Run the following command:
+    ```bash
+    chmod +x go-generator-macos  # For macOS
+    chmod +x go-generator-linux  # For Linux
+    Running the Tool:
+    ```
+    You can run the tool directly from the command line:
+    ```bash
+    ./go-generator-macos --generate-mvc --file path/to/entity.go  # macOS
+    ./go-generator-linux --generate-mvc --file path/to/entity.go  # Linux
+    ```
+4. On Windows
+    - Opening Command Prompt: 
+      - Open the Command Prompt by searching for cmd in the Windows search bar and clicking on the Command Prompt application.
+    - Navigating to the File: 
+      - Once the Command Prompt is open, the user needs to navigate to the directory where go-generator.exe is located. This can be done using the cd (change directory) command.
+      For example, if go-generator.exe is in the Downloads folder, the user would type cd Downloads and press Enter.
+    - Running the Application:
+      - To run the application from the Command Prompt, the user types the name of the executable file (go-generator.exe) and presses Enter.
+      If the user wants to pass additional arguments or flags to the application (as specified in your documentation or help command), they can be added after the file name. For example: 
+      ```bash
+      go-generator.exe --generate-mvc --file path/to/entity.go.
+      ```
 ## Usage
-To generate MVC components, run:
+To generate MVC components in this Github Repository, run:
 ```bash
-go run main.go --generate-mvc --file path/to/models/entity/{model-file}.go
+go run path/to/main.go --generate-mvc --file path/to/models/entity/{model-file}.go
 ```
-
 Replace {model-file}.go with your actual model file name.
 
 ## Example
-### Sample Directory Structures of test
+
+### Sample Directory Structures of User
 ```bash
 - internal
   -- user
