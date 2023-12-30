@@ -3,6 +3,7 @@ package generatorMVC
 import (
 	"bufio"
 	"fmt"
+	"github.com/pworld/loggers"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -35,15 +36,15 @@ type Method struct {
 func GenerateMVC(filePath string) {
 	structName, fields, err := parseFileForStruct(filePath)
 	if err != nil {
-		fmt.Println("Failed to get  the structName: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to parse file for struct: %s\n", err))
 		return
 	}
 	moduleName, err := getModuleName("go.mod")
 	if err != nil {
-		fmt.Println("Error:", err)
+		loggers.Error(fmt.Sprintf("Failed to get the module name: %s\n", err))
 		return
 	}
-	fmt.Println(fields)
+	loggers.Info(fmt.Sprintf("fields: %s\n", fields))
 	// Generate the controller file
 	writeControllerFileContent(filePath, structName, moduleName, fields)
 	// Generate the Service file
@@ -52,7 +53,7 @@ func GenerateMVC(filePath string) {
 	writeRepositoryFileContent(filePath, structName, moduleName, fields)
 	// Generate the View file
 	writeViewFileContent(filePath, structName, moduleName, fields)
-	//// Generate the Test file
+	// Generate the Test file
 	writeTestFileContent(filePath, structName, moduleName, fields)
 	// Generate the Mock file
 	writeMockFileContent(filePath, structName, moduleName, fields)
@@ -96,6 +97,7 @@ func parseFileForStruct(filePath string) (string, []StructField, error) {
 func getModuleName(modFilePath string) (string, error) {
 	file, err := os.Open(modFilePath)
 	if err != nil {
+		loggers.Error(fmt.Sprintf("Failed to open module file: %s\n", err))
 		return "", err
 	}
 	defer file.Close()

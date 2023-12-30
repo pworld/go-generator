@@ -5,10 +5,9 @@ const RepositoryTemplate = `package repository
 import (
     "context"
     "database/sql"
-    "errors"
     "{{.ModuleName}}/helper"
-    "{{.ModuleName}}/helper/loggers"
     "{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
+	"github.com/pworld/loggers"
     "strings"
 )
 
@@ -39,7 +38,7 @@ func (r *{{.LowerStructName}}Repository) Create{{.StructName}}(ctx context.Conte
     var id int
     err := r.db.QueryRowContext(ctx, query, {{.ArgumentList}}).Scan(&id)
     if err != nil {
-        loggers.ErrorLog("Error creating {{.LowerStructName}}", "Create{{.StructName}}", query, 0, err)
+        loggers.Error(fmt.Sprintf("Error creating {{.LowerStructName}}: %s", err))
         return 0, err
     }
     return id, nil

@@ -3,6 +3,7 @@ package generatorMVC
 import (
 	"fmt"
 	"github.com/pworld/go-generator/src/templateMVC"
+	"github.com/pworld/loggers"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,7 @@ func writeRepositoryFileContent(filePath, structName, moduleName string, fields 
 	entityDir := filepath.Dir(filePath)
 	modelsDir := filepath.Dir(entityDir)
 	baseDir := filepath.Dir(modelsDir)
+	packageName := filepath.Base(baseDir)
 
 	repositoryDir := filepath.Join(baseDir, "models/repository")
 	repositoryFileName := fmt.Sprintf("%s_repository.go", lowerStructName)
@@ -23,21 +25,20 @@ func writeRepositoryFileContent(filePath, structName, moduleName string, fields 
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(repositoryDir, os.ModePerm); err != nil {
-		fmt.Printf("Failed to create directory: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create repository directory: %s\n", err))
 		return
 	}
 
 	file, err := os.Create(repositoryFilePath)
 	if err != nil {
-		fmt.Printf("Failed to create repository file: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create repository file: %s\n", err))
 		return
 	}
 	defer file.Close()
 
-	// Execute the template with the struct data
 	tmpl, err := template.New("repository").Parse(templateMVC.RepositoryTemplate)
 	if err != nil {
-		fmt.Println("Error creating template:", err)
+		loggers.Error(fmt.Sprintf("Error creating repository template: %s\n", err))
 		return
 	}
 
@@ -72,6 +73,7 @@ func writeRepositoryFileContent(filePath, structName, moduleName string, fields 
 		ScanFields            string
 		ScanFieldsUpdate      string
 		ScanFieldsListsUpdate string
+		PackageName           string
 	}{
 		ModuleName:            moduleName,
 		StructName:            structName,
@@ -83,10 +85,11 @@ func writeRepositoryFileContent(filePath, structName, moduleName string, fields 
 		ScanFields:            scanFields,
 		ScanFieldsUpdate:      scanFieldsUpdate,
 		ScanFieldsListsUpdate: scanFieldsListsUpdate,
+		PackageName:           packageName,
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {
-		fmt.Println("Error executing template:", err)
+		loggers.Error(fmt.Sprintf("Error executing repository template: %s\n", err))
 		return
 	}
 

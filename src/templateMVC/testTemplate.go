@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
 	"{{.ModuleName}}/internal/{{.PackageName}}/services"
-	"{{.ModuleName}}/tests/{{.PackageName}}/mocks"
+	"{{.ModuleName}}/internal/{{.PackageName}}/tests/mocks"
 )
 
 {{range .Methods}}

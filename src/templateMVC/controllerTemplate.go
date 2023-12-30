@@ -10,6 +10,7 @@ import (
 	"{{.ModuleName}}/internal/{{.PackageName}}/models/repository"
 	"{{.ModuleName}}/internal/{{.PackageName}}/services"
 	"{{.ModuleName}}/internal/{{.PackageName}}/views"
+	"github.com/pworld/loggers"
 	"math"
 	"strconv"
 	"time"
@@ -32,18 +33,19 @@ func New{{.StructName}}Controller(db *sql.DB) *{{.StructName}}Controller {
 func (uc *{{.StructName}}Controller) CreateUser(c *fiber.Ctx) error {
 	var {{.LowerStructName}} entity.{{.StructName}}
 	if err := c.BodyParser(&{{.LowerStructName}}); err != nil {
+		loggers.Error(fmt.Sprintf("Error parsing request body: %s", err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
 	{{.LowerStructName}}.CreatedAt = time.Now()
 
 	if _, err := uc.{{.LowerStructName}}Service.Create{{.StructName}}(c.Context(), {{.LowerStructName}}); err != nil {
+		loggers.Error(fmt.Sprintf("Error creating {{.StructName}}: %s", err))
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON({{.LowerStructName}})
 }
-
 // GetUser retrieves a {{.LowerStructName}} by ID
 func (uc *{{.StructName}}Controller) GetUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))

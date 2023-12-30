@@ -3,6 +3,7 @@ package generatorMVC
 import (
 	"fmt"
 	"github.com/pworld/go-generator/src/templateMVC"
+	"github.com/pworld/loggers"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,6 +15,7 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 
 	// Calculate the directory path for the controller
 	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath))) // Move two directories up
+	fmt.Print(baseDir)
 	packageName := filepath.Base(baseDir)
 	controllerDir := filepath.Join(baseDir, "controllers")
 	controllerFileName := fmt.Sprintf("%s_controller.go", lowerStructName)
@@ -21,13 +23,13 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(controllerDir, os.ModePerm); err != nil {
-		fmt.Printf("Failed to create directory: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create controller directory: %s\n", err))
 		return
 	}
 
 	file, err := os.Create(controllerFilePath)
 	if err != nil {
-		fmt.Printf("Failed to create controller file: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create controller file: %s\n", err))
 		return
 	}
 	defer file.Close()
@@ -35,7 +37,7 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 	// Execute the template with the struct data
 	tmpl, err := template.New("controller").Parse(templateMVC.ControllerTemplate)
 	if err != nil {
-		fmt.Println("Error creating template:", err)
+		loggers.Error(fmt.Sprintf("Error creating controller template: %s\n", err))
 		return
 	}
 
@@ -43,7 +45,7 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 		ModuleName      string
 		StructName      string
 		LowerStructName string
-		PackageName     string // Make sure this is included
+		PackageName     string
 		Fields          []StructField
 	}{
 		ModuleName:      moduleName,
@@ -54,7 +56,7 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {
-		fmt.Println("Error executing template:", err)
+		loggers.Error(fmt.Sprintf("Error executing controller template: %s\n", err))
 		return
 	}
 

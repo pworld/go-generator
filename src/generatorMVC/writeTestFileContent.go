@@ -3,6 +3,7 @@ package generatorMVC
 import (
 	"fmt"
 	"github.com/pworld/go-generator/src/templateMVC"
+	"github.com/pworld/loggers"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,6 +18,7 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 	entityDir := filepath.Dir(filePath)
 	modelsDir := filepath.Dir(entityDir)
 	baseDir := filepath.Dir(modelsDir)
+	packageName := filepath.Base(baseDir)
 
 	testsDir := filepath.Join(baseDir, "tests/service_tests")
 	testsFileName := fmt.Sprintf("%s_service_test.go", lowerStructName)
@@ -24,13 +26,13 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(testsDir, os.ModePerm); err != nil {
-		fmt.Printf("Failed to create directory: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create tests directory: %s\n", err))
 		return
 	}
 
 	file, err := os.Create(testsFilePath)
 	if err != nil {
-		fmt.Printf("Failed to create repository file: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create test file: %s\n", err))
 		return
 	}
 	defer file.Close()
@@ -38,7 +40,7 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 	// Execute the template with the struct data
 	tmpl, err := template.New("test").Parse(templateMVC.TestTemplate)
 	if err != nil {
-		fmt.Println("Error creating template:", err)
+		loggers.Error(fmt.Sprintf("Error creating test template: %s\n", err))
 		return
 	}
 
@@ -50,17 +52,19 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 		PackagePath     string
 		Fields          []StructField
 		Methods         []Method
+		PackageName     string
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
-		LowerStructName: strings.ToLower(structName),
+		LowerStructName: lowerStructName,
 		PackagePath:     lowerStructName,
 		Fields:          fields,
 		Methods:         GenerateCRUDTestMethods(structName),
+		PackageName:     packageName,
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {
-		fmt.Println("Error executing template:", err)
+		loggers.Error(fmt.Sprintf("Error executing test template: %s\n", err))
 		return
 	}
 

@@ -10,7 +10,8 @@
 
 ## Prerequisites
 Your Go project should follow this structure:
-- Entity files must be located at `models/entity/{model-file}.go`.
+- Entity files must be located at `internal/{package-name}/models/entity/{model-file}.go`.
+- *internal* Directory is necessary and can't be change
 
 ## Installation
 ```bash

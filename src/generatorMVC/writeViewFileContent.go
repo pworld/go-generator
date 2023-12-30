@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"github.com/pworld/go-generator/src/templateMVC"
+	"github.com/pworld/loggers"
 )
 
 func writeViewFileContent(filePath, structName, moduleName string, fields []StructField) {
@@ -16,45 +17,45 @@ func writeViewFileContent(filePath, structName, moduleName string, fields []Stru
 	viewsDir := filepath.Join(baseDir, "views")
 	viewFileName := fmt.Sprintf("%s_view.go", lowerStructName)
 	viewFilePath := filepath.Join(viewsDir, viewFileName)
+	packageName := filepath.Base(baseDir)
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(viewsDir, os.ModePerm); err != nil {
-		fmt.Printf("Failed to create directory: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create views directory: %s\n", err))
 		return
 	}
 
 	file, err := os.Create(viewFilePath)
 	if err != nil {
-		fmt.Printf("Failed to create service file: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create view file: %s\n", err))
 		return
 	}
 	defer file.Close()
 
-	// Parse and execute the template
 	tmpl, err := template.New("view").Parse(templateMVC.ViewsTemplate)
 	if err != nil {
-		fmt.Println("Error creating template:", err)
+		loggers.Error(fmt.Sprintf("Error creating view template: %s\n", err))
 		return
 	}
 
-	// Prepare template data
 	data := struct {
 		ModuleName      string
 		StructName      string
 		LowerStructName string
 		PackagePath     string
 		Fields          []StructField
+		PackageName     string
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
-		LowerStructName: strings.ToLower(structName),
+		LowerStructName: lowerStructName,
 		PackagePath:     lowerStructName,
 		Fields:          fields,
+		PackageName:     packageName,
 	}
 
-	// Execute the template with the data
 	if err := tmpl.Execute(file, data); err != nil {
-		fmt.Println("Error executing template:", err)
+		loggers.Error(fmt.Sprintf("Error executing view template: %s\n", err))
 		return
 	}
 

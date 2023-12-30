@@ -3,6 +3,7 @@ package generatorMVC
 import (
 	"fmt"
 	"github.com/pworld/go-generator/src/templateMVC"
+	"github.com/pworld/loggers"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,27 +18,29 @@ func writeMockFileContent(filePath, structName, moduleName string, fields []Stru
 	entityDir := filepath.Dir(filePath)
 	modelsDir := filepath.Dir(entityDir)
 	baseDir := filepath.Dir(modelsDir)
+	packageName := filepath.Base(baseDir)
 
-	testsDir := filepath.Join(baseDir, "tests/mocks")
-	testsFileName := fmt.Sprintf("%s_service_test.go", lowerStructName)
-	testsFilePath := filepath.Join(testsDir, testsFileName)
+	mocksDir := filepath.Join(baseDir, "tests/mocks")
+	mockFileName := fmt.Sprintf("%s_mock.go", lowerStructName)
+	mockFilePath := filepath.Join(mocksDir, mockFileName)
 
 	// Ensure the directory exists
-	if err := os.MkdirAll(testsDir, os.ModePerm); err != nil {
-		fmt.Printf("Failed to create directory: %s\n", err)
+	if err := os.MkdirAll(mocksDir, os.ModePerm); err != nil {
+		loggers.Error(fmt.Sprintf("Failed to create mocks directory: %s\n", err))
 		return
 	}
 
-	file, err := os.Create(testsFilePath)
+	file, err := os.Create(mockFilePath)
 	if err != nil {
-		fmt.Printf("Failed to create repository file: %s\n", err)
+		loggers.Error(fmt.Sprintf("Failed to create mock file: %s\n", err))
 		return
 	}
 	defer file.Close()
+
 	// Execute the template with the struct data
 	tmpl, err := template.New("mock").Parse(templateMVC.MockTemplate)
 	if err != nil {
-		fmt.Println("Error creating template:", err)
+		loggers.Error(fmt.Sprintf("Error creating mock template: %s\n", err))
 		return
 	}
 
@@ -45,16 +48,18 @@ func writeMockFileContent(filePath, structName, moduleName string, fields []Stru
 		ModuleName      string
 		StructName      string
 		LowerStructName string
+		PackageName     string
 	}{
-		ModuleName:      structName,
+		ModuleName:      moduleName,
 		StructName:      structName,
 		LowerStructName: lowerStructName,
+		PackageName:     packageName,
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {
-		fmt.Println("Error executing template:", err)
+		loggers.Error(fmt.Sprintf("Error executing mock template: %s\n", err))
 		return
 	}
 
-	fmt.Println("Mock file generated:", testsFilePath)
+	fmt.Println("Mock file generated:", mockFilePath)
 }
