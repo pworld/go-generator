@@ -108,7 +108,18 @@ After running go-generator, you can expect the following directory structure and
 ```
 
 ## Contributing
-Contributions are welcome. Feel free to open issues or submit pull requests.
+Contributions to go-generator are welcome! If you'd like to contribute, please fork the repository and use a feature branch. Pull requests are warmly welcome.
+
+## How to Contribute
+1. Fork the repository.
+2. Create a new branch for each feature or improvement.
+3. Send a pull request from each feature branch to the develop branch.
+
+## Reporting Issues
+If you find any bugs or have a feature request, please create an issue on GitHub. We appreciate detailed and accurate reports that help us identify and fix issues.
+
+## Support
+If you have any questions or need help with using go-generator, please create an issue, and we will do our best to assist you.
 
 ## License
-go-generator is licensed under the Apache 2.0 License. See LICENSE for more details.
+go-generator is licensed under the Apache License 2.0. See the LICENSE file for more details.
