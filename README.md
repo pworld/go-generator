@@ -14,16 +14,80 @@ Your Go project should follow this structure:
 - *internal* Directory is necessary and can't be change
 
 ## Installation Guide:
+
+### Command Init
+1. Add Init using Viper
+```bash
+package cmd
+
+import (
+	"fmt"
+	"github.com/pworld/go-mvc-boilerplate/pkg/cmd/generate"
+	"github.com/pworld/loggers"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"os"
+)
+
+var rootCmd = &cobra.Command{
+	Use:   viper.GetString("APP_NAME"),
+	Short: "Hello From CLI",
+	Run: func(cmd *cobra.Command, args []string) {
+		loggers.InfoLog(fmt.Sprintf("APP Name: %s", viper.GetString("APP_NAME")), "", "", 0)
+		loggers.InfoLog(fmt.Sprintf("APP ENV: %s", viper.GetString("APP_ENV")), "", "", 0)
+	},
+}
+
+func Initialize() {
+	// Register the GenerateMVC command
+	rootCmd.AddCommand(generate.GenerateMVCCmd())
+}
+
+func Execute() error {
+	return rootCmd.Execute()
+}
+
+```
+2. Create generateMVC. Sample Code
+```bash
+package generate
+
+import (
+	generator "github.com/pworld/go-generator"
+	"github.com/pworld/loggers"
+	"github.com/spf13/cobra"
+)
+
+func GenerateMVCCmd() *cobra.Command {
+	var filePath string
+
+	var cmd = &cobra.Command{
+		Use:   "generate-mvc",
+		Short: "Generate MVC structure",
+		Run: func(cmd *cobra.Command, args []string) {
+			if filePath == "" {
+				loggers.Warn("File path is required when generating MVC")
+				return
+			}
+			generator.GenerateMVC(filePath)
+		},
+	}
+
+	cmd.Flags().StringVarP(&filePath, "file", "f", "", "Path to the file")
+	return cmd
+} 
+```
+### Binary Instalations
 1. Download the Binary:
-Go to the [Releases page](https://github.com/pworld/go-generator/releases/tag/v.1.0.2) of the go-generator repository. 
+Go to the [Releases page](https://github.com/pworld/go-generator/releases/tag/v1.0.2) of the go-generator repository. 
 2. Download the binary for your operating system (go-generator.exe for Windows, go-generator-macos for macOS, go-generator-linux for Linux).
 Make the Binary Executable (Linux/macOS):
 3. On Linux or macOS, you might need to make the binary executable. Run the following command:
     ```bash
     chmod +x go-generator-macos  # For macOS
     chmod +x go-generator-linux  # For Linux
-    Running the Tool:
     ```
+   Running the Tool:
     You can run the tool directly from the command line:
     ```bash
     ./go-generator-macos --generate-mvc --file path/to/entity.go  # macOS
