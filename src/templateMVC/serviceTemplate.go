@@ -45,4 +45,22 @@ func (s *{{.LowerStructName}}Service) Update{{.StructName}}(ctx context.Context,
 func (s *{{.LowerStructName}}Service) Delete{{.StructName}}(ctx context.Context, id int) error {
 	return s.{{.LowerStructName}}Repo.Delete{{.StructName}}(ctx, id)
 }
+
+// {{.StructName}}Lists retrieves a list of {{.LowerStructName}} with pagination and filtering
+func (s *{{.LowerStructName}}Service) {{.StructName}}Lists(ctx context.Context, page, pageSize int, search string, filters map[string]interface{}) ([]entity.{{.StructName}}, int, error) {
+	{{.LowerStructName}}, err := s.{{.LowerStructName}}Repo.List{{.StructName}}(ctx, page, pageSize, search, filters)
+	if err != nil {
+		loggers.Error("Failed to list {{.LowerStructName}}", "{{.StructName}}Lists", "{{.LowerStructName}}/service", 500, err)
+		return nil, 0, err
+	}
+
+	total, err := s.{{.LowerStructName}}Repo.Total{{.StructName}}(ctx, search, filters)
+	if err != nil {
+		loggers.Error("Failed to count total {{.LowerStructName}}", "{{.StructName}}Lists", "{{.LowerStructName}}/service", 500, err)
+		return nil, 0, err
+	}
+
+	return {{.LowerStructName}}, total, nil
+}
+
 `

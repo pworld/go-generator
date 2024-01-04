@@ -46,15 +46,16 @@ func (r *{{.LowerStructName}}Repository) Create{{.StructName}}(ctx context.Conte
 
 // Get{{.StructName}}ByID fetches a {{.LowerStructName}} by their ID from the database
 func (r *{{.LowerStructName}}Repository) Get{{.StructName}}ByID(ctx context.Context, id int) (entity.{{.StructName}}, error) {
+    var {{.LowerStructName}} entity.{{.StructName}} // Declare a variable to hold the data
     query := "SELECT * FROM {{.TableName}} WHERE id = ?;"
 
     err := r.db.QueryRowContext(ctx, query, id).Scan({{.ScanFields}})
     if err != nil {
-        loggers.ErrorLog("Error fetching {{.LowerStructName}} by ID", "Get{{.StructName}}ByID", query, 0, err)
+        loggers.Error("Error fetching {{.LowerStructName}} by ID", "Get{{.StructName}}ByID", query, 0, err)
         return entity.{{.StructName}}{}, err
     }
 
-    return {{.LowerStructName}}, nil
+    return {{.LowerStructName}}, nil // Return the fetched data
 }
 
 // Update{{.StructName}} updates an existing {{.LowerStructName}}'s details in the database
@@ -65,7 +66,7 @@ func (r *{{.LowerStructName}}Repository) Update{{.StructName}}(ctx context.Conte
     	{{.ScanFieldsUpdate}}
 	)
     if err != nil {
-        loggers.ErrorLog("Error updating {{.LowerStructName}}", "Update{{.StructName}}", query, 0, err)
+        loggers.Error("Error updating {{.LowerStructName}}", "Update{{.StructName}}", query, 0, err)
         return err
     }
 
@@ -78,7 +79,7 @@ func (r *{{.LowerStructName}}Repository) Delete{{.StructName}}(ctx context.Conte
 
     _, err := r.db.ExecContext(ctx, query, id)
     if err != nil {
-        loggers.ErrorLog("Error deleting {{.LowerStructName}}", "Delete{{.StructName}}", query, 0, err)
+        loggers.Error("Error deleting {{.LowerStructName}}", "Delete{{.StructName}}", query, 0, err)
         return err
     }
 
@@ -97,7 +98,7 @@ func (r *{{.LowerStructName}}Repository) List{{.StructName}}s(ctx context.Contex
 
     rows, err := r.db.QueryContext(ctx, query, args...)
     if err != nil {
-        loggers.ErrorLog("Error fetching list of {{.LowerStructName}}s", "List{{.StructName}}s", query, 0, err)
+        loggers.Error("Error fetching list of {{.LowerStructName}}s", "List{{.StructName}}s", query, 0, err)
         return nil, err
     }
     defer rows.Close()
@@ -123,7 +124,7 @@ func (r *{{.LowerStructName}}Repository) Total{{.StructName}}s(ctx context.Conte
 
     err := r.db.QueryRowContext(ctx, query, args...).Scan(&total)
     if err != nil {
-        loggers.ErrorLog("Error counting total {{.LowerStructName}}s", "Total{{.StructName}}s", query, 0, err)
+        loggers.Error("Error counting total {{.LowerStructName}}s", "Total{{.StructName}}s", query, 0, err)
         return 0, err
     }
 

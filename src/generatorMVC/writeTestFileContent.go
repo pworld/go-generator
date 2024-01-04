@@ -80,24 +80,13 @@ func GenerateCRUDTestMethods(structName string) []Method {
 			Name:      "Create" + structName,
 			SetupMock: fmt.Sprintf(`mockRepo.On("Create%s", mock.Anything, mock.AnythingOfType("entity.%s")).Return(1, nil)`, structName, structName),
 			TestImplementation: fmt.Sprintf(`
-	mock%s := entity.%s{
-	// Fill The test case
-	}
-	%sID, err := svc.Register%s(context.Background(), mock%s)`, structName, structName, lowerStructName, structName, structName),
+    mock%s := entity.%s{
+        // Fill The test case
+    }
+    %sID, err := svc.Create%s(context.Background(), mock%s)`, structName, structName, lowerStructName, structName, structName),
 			Assertions: fmt.Sprintf(`
-	assert.NoError(t, err)
-	assert.Equal(t, 1, %sID)`, lowerStructName),
-		},
-		{
-			Name:      "Update" + structName,
-			SetupMock: fmt.Sprintf(`mockRepo.On("Update%s", mock.Anything, mock.AnythingOfType("entity.%s")).Return(nil)`, structName, structName),
-			TestImplementation: fmt.Sprintf(`
-	mock%s := entity.%s{
-	// Fill The test case
-	}
-	err := svc.Update%s(context.Background(), mock%s)`, structName, structName, structName, structName),
-			Assertions: `
-	assert.NoError(t, err)`,
+    assert.NoError(t, err)
+    assert.Equal(t, 1, %sID)`, lowerStructName),
 		},
 		{
 			Name:      "Delete" + structName,
@@ -123,20 +112,21 @@ func GenerateCRUDTestMethods(structName string) []Method {
 		},
 		{
 			Name: "List" + structName + "s",
-			SetupMock: fmt.Sprintf(`mockRepo.On("List%ss", mock.Anything, page, pageSize, "", mock.Anything).Return(mock%ss, nil)
-	mockRepo.On("Total%ss", mock.Anything, "", mock.Anything).Return(total%ss, nil)`, structName, structName, structName, structName),
+			SetupMock: fmt.Sprintf(`
+	page, pageSize, totalData := 1, 10, 2
+	mockRepo.On("List%s", mock.Anything, page, pageSize, "", mock.Anything).Return(mock%s, nil)
+    mockRepo.On("Total%s", mock.Anything, "", mock.Anything).Return(totalData, nil)`, structName, structName, structName),
 			TestImplementation: fmt.Sprintf(`
-	page, pageSize := 1, 10
-	total%ss := 2 // Total number of %ss available
-	mock%ss := []entity.%s{
-	// Fill The test case
-	}
-	%ss, total, err := svc.List%ss(context.Background(), page, pageSize, "", nil)`, structName, structName, structName, structName, lowerStructName, structName),
+    total%s := 2 // Total number of %s available
+    mock%s := []entity.%s{
+        // Fill The test case
+    }
+    %s, total, err := svc.List%s(context.Background(), page, pageSize, "", nil)`, structName, structName, structName, structName, lowerStructName, structName),
 			Assertions: fmt.Sprintf(`
-	assert.NoError(t, err)
-	assert.Equal(t, total%ss, total)
-	assert.Len(t, %ss, len(mock%ss))
-	assert.Equal(t, mock%ss, %ss)`, structName, lowerStructName, structName, structName, lowerStructName),
+    assert.NoError(t, err)
+    assert.Equal(t, total%s, total)
+    assert.Len(t, %ss, len(mock%s))
+    assert.Equal(t, mock%s, %s)`, structName, lowerStructName, structName, structName, lowerStructName),
 		},
 	}
 }

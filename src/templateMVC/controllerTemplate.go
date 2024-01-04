@@ -4,6 +4,7 @@ const ControllerTemplate = `package controllers
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"{{.ModuleName}}/helper"
 	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
@@ -53,7 +54,7 @@ func (uc *{{.StructName}}Controller) GetUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid {{.LowerStructName}} ID"})
 	}
 	
-	{{.LowerStructName}}, err := uc.{{.LowerStructName}}Service.GetUser(c.Context(), id)
+	{{.LowerStructName}}, err := uc.{{.LowerStructName}}Service.Get{{.StructName}}(c.Context(), id)
 	if err != nil {
 		return views.{{.StructName}}ErrorResponse(c, fiber.StatusInternalServerError, "{{.StructName}} not found")
 	}

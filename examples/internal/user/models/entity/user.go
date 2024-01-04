@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// User represents the user entity
+// User represents the company entity
 type Company struct {
 	ID        int        `json:"id"`
 	Fullname  string     `json:"fullname" validate:"required"`

@@ -108,7 +108,7 @@ Make the Binary Executable (Linux/macOS):
 ## Usage
 To generate MVC components in this Github Repository, run:
 ```bash
-go run path/to/main.go --generate-mvc --file path/to/models/entity/{model-file}.go
+go run path/to/main.go --generate-mvc --file path/to/models/entity/{models-file}.go
 ```
 Replace {model-file}.go with your actual model file name.
 
@@ -117,10 +117,10 @@ Replace {model-file}.go with your actual model file name.
 ### Sample Directory Structures of User
 ```bash
 - internal
-  -- user
+  -- company
     --- models
       ---- entity
-        ----- user.go
+        ----- company.go
 ```
 
 ### Sample of User File
@@ -144,7 +144,7 @@ type User struct {
 ```
 ### Usage
 ```bash
-go run main.go --generate-mvc --file internal/user/models/entity/user.go
+go run main.go --generate-mvc --file internal/company/models/entity/company.go
 ```
 
 ## Expected Output Structure
