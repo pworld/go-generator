@@ -37,14 +37,14 @@ func (m *Mock{{.StructName}}Repository) Delete{{.StructName}}(ctx context.Contex
 	return args.Error(0)
 }
 
-// List{{.StructName}}s mocks the List{{.StructName}}s method
-func (m *Mock{{.StructName}}Repository) List{{.StructName}}s(ctx context.Context, page, pageSize int, search string, filters map[string]interface{}) ([]entity.{{.StructName}}, error) {
+// List{{.StructName}} mocks the List{{.StructName}} method
+func (m *Mock{{.StructName}}Repository) List{{.StructName}}(ctx context.Context, page, pageSize int, search string, filters map[string]interface{}) ([]entity.{{.StructName}}, error) {
 	args := m.Called(ctx, page, pageSize, search, filters)
 	return args.Get(0).([]entity.{{.StructName}}), args.Error(1)
 }
 
-// Total{{.StructName}}s mocks the Total{{.StructName}}s method
-func (m *Mock{{.StructName}}Repository) Total{{.StructName}}s(ctx context.Context, search string, filters map[string]interface{}) (int, error) {
+// Total{{.StructName}} mocks the Total{{.StructName}} method
+func (m *Mock{{.StructName}}Repository) Total{{.StructName}}(ctx context.Context, search string, filters map[string]interface{}) (int, error) {
 	args := m.Called(ctx, search, filters)
 	return args.Int(0), args.Error(1)
 }

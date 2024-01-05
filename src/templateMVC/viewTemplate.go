@@ -26,15 +26,15 @@ func {{.StructName}}Response(c *fiber.Ctx, {{.LowerStructName}} entity.{{.Struct
     })
 }
 
-// {{.StructName}}ListResponse formats a response for a list of {{.LowerStructName}}s
-func {{.StructName}}ListResponse(c *fiber.Ctx, {{.LowerStructName}}s []entity.{{.StructName}}, total, totalPages int) error {
-    formatted{{.StructName}}s := make([]map[string]interface{}, 0)
-    for _, {{.LowerStructName}} := range {{.LowerStructName}}s {
-        formatted{{.StructName}}s = append(formatted{{.StructName}}s, Format{{.StructName}}Details({{.LowerStructName}}))
+// {{.StructName}}ListResponse formats a response for a list of {{.LowerStructName}}
+func {{.StructName}}ListResponse(c *fiber.Ctx, {{.LowerStructName}} []entity.{{.StructName}}, total, totalPages int) error {
+    formatted{{.StructName}} := make([]map[string]interface{}, 0)
+    for _, {{.LowerStructName}} := range {{.LowerStructName}} {
+        formatted{{.StructName}} = append(formatted{{.StructName}}, Format{{.StructName}}Details({{.LowerStructName}}))
     }
     return c.JSON(fiber.Map{
         "success":    true,
-        "items":      formatted{{.StructName}}s,
+        "items":      formatted{{.StructName}},
         "total":      total,
         "totalPages": totalPages,
     })

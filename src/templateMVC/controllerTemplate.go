@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/go-playground/validator/v10"
 	"{{.ModuleName}}/helper"
 	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
 	"{{.ModuleName}}/internal/{{.PackageName}}/models/repository"
@@ -22,6 +23,9 @@ type {{.StructName}}Controller struct {
 	{{.LowerStructName}}Service services.{{.StructName}}Service
 }
 
+// validator instance
+var validate = validator.New()
+
 func New{{.StructName}}Controller(db *sql.DB) *{{.StructName}}Controller {
 	{{.LowerStructName}}Repo := repository.New{{.StructName}}Repository(db)
 	{{.LowerStructName}}Service := services.New{{.StructName}}Service({{.LowerStructName}}Repo)
@@ -33,20 +37,21 @@ func New{{.StructName}}Controller(db *sql.DB) *{{.StructName}}Controller {
 // CreateUser creates a new {{.LowerStructName}}
 func (uc *{{.StructName}}Controller) CreateUser(c *fiber.Ctx) error {
 	var {{.LowerStructName}} entity.{{.StructName}}
-	if err := c.BodyParser(&{{.LowerStructName}}); err != nil {
-		loggers.Error(fmt.Sprintf("Error parsing request body: %s", err))
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	if err := parseAndValidate(c, &{{.LowerStructName}}); err != nil {
+		loggers.Error("Error parsing request body:", err)
+		return handleValidationError(c, err)
 	}
 
 	{{.LowerStructName}}.CreatedAt = time.Now()
 
 	if _, err := uc.{{.LowerStructName}}Service.Create{{.StructName}}(c.Context(), {{.LowerStructName}}); err != nil {
-		loggers.Error(fmt.Sprintf("Error creating {{.StructName}}: %s", err))
+		loggers.Error("Error creating {{.StructName}}:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON({{.LowerStructName}})
 }
+
 // GetUser retrieves a {{.LowerStructName}} by ID
 func (uc *{{.StructName}}Controller) GetUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
@@ -69,10 +74,10 @@ func (uc *{{.StructName}}Controller) Update{{.StructName}}(c *fiber.Ctx) error {
 	}
 	
 	var {{.LowerStructName}} entity.{{.StructName}}
-	if err := c.BodyParser(&{{.LowerStructName}}); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	if err := parseAndValidate(c, &{{.LowerStructName}}); err != nil {
+		return handleValidationError(c, err)
 	}
-	
+
 	{{.LowerStructName}}.ID = id
 	{{.LowerStructName}}.UpdatedAt = time.Now()
 	
@@ -97,17 +102,20 @@ func (uc *{{.StructName}}Controller) Delete{{.StructName}}(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
-// {{.StructName}}Lists lists all {{.LowerStructName}}s
+// {{.StructName}}Lists lists all {{.LowerStructName}}
 func (uc *{{.StructName}}Controller) {{.StructName}}Lists(c *fiber.Ctx) error {
-page, pageSize, err := helper.ExtractPageAndSize(c)
+	page, pageSize, err := helper.ExtractPageAndSize(c)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid pagination parameters"})
+	}
 	search, filters := helper.ExtractSearchAndParams(c)
 	
-	{{.LowerStructName}}s, total, err := uc.{{.LowerStructName}}Service.{{.StructName}}Lists(c.Context(), page, pageSize, search, filters)
+	{{.LowerStructName}}, total, err := uc.{{.LowerStructName}}Service.{{.StructName}}Lists(c.Context(), page, pageSize, search, filters)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to retrieve {{.LowerStructName}} list"})
 	}
 	
 	totalPages := int(math.Ceil(float64(total) / float64(pageSize)))
-	return views.{{.StructName}}ListResponse(c, {{.LowerStructName}}s, total, totalPages)
+	return views.{{.StructName}}ListResponse(c, {{.LowerStructName}}, total, totalPages)
 }
 `

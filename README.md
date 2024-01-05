@@ -33,8 +33,8 @@ var rootCmd = &cobra.Command{
 	Use:   viper.GetString("APP_NAME"),
 	Short: "Hello From CLI",
 	Run: func(cmd *cobra.Command, args []string) {
-		loggers.InfoLog(fmt.Sprintf("APP Name: %s", viper.GetString("APP_NAME")), "", "", 0)
-		loggers.InfoLog(fmt.Sprintf("APP ENV: %s", viper.GetString("APP_ENV")), "", "", 0)
+		loggers.Info(fmt.Sprintf("APP Name: %s", viper.GetString("APP_NAME")), "", "", 0)
+		loggers.Info(fmt.Sprintf("APP ENV: %s", viper.GetString("APP_ENV")), "", "", 0)
 	},
 }
 
@@ -46,7 +46,6 @@ func Initialize() {
 func Execute() error {
 	return rootCmd.Execute()
 }
-
 ```
 2. Create generateMVC. Sample Code
 ```bash
@@ -144,7 +143,7 @@ type User struct {
 ```
 ### Usage
 ```bash
-go run main.go --generate-mvc --file internal/company/models/entity/company.go
+go run main.go generate-mvc --file path/to/models/entity/{model-file}.go
 ```
 
 ## Expected Output Structure
