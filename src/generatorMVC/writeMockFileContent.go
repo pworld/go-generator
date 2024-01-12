@@ -37,13 +37,7 @@ func writeMockFileContent(filePath, structName, moduleName string, fields []Stru
 	}
 	defer file.Close()
 
-	// Execute the template with the struct data
-	tmpl, err := template.New("mock").Parse(templateMVC.MockTemplate)
-	if err != nil {
-		loggers.Error(fmt.Sprintf("Error creating mock template: %s\n", err))
-		return
-	}
-
+	// Data for template execution
 	data := struct {
 		ModuleName      string
 		StructName      string
@@ -52,8 +46,15 @@ func writeMockFileContent(filePath, structName, moduleName string, fields []Stru
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
-		LowerStructName: lowerStructName,
+		LowerStructName: strings.ToLower(structName),
 		PackageName:     packageName,
+	}
+
+	// Execute the template with the struct data
+	tmpl, err := template.New("mock").Parse(templateMVC.MockTemplate)
+	if err != nil {
+		loggers.Error(fmt.Sprintf("Error creating mock template: %s\n", err))
+		return
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {

@@ -1,22 +1,17 @@
 package views
 
 import (
-	"github.com/pworld/go-generator/examples/internal/user/models/entity"
+	"github.com/pworld/go-generator/examples/company/models/entity"
 )
 
 // FormatCompanyDetails formats the company data for the response
 func FormatCompanyDetails(company entity.Company) map[string]interface{} {
 	return map[string]interface{}{
 		// Fields to format here...
-		"id":        company.ID,
-		"fullname":  company.Fullname,
-		"email":     company.Email,
-		"phone":     company.Phone,
-		"username":  company.Username,
-		"password":  company.Password,
-		"createdat": company.CreatedAt,
-		"updatedat": company.UpdatedAt,
-		"deletedat": company.DeletedAt,
+		"id":       company.ID,
+		"fullname": company.Fullname,
+		"email":    company.Email,
+		"phone":    company.Phone,
 	}
 }
 
@@ -29,15 +24,15 @@ func CompanyResponse(c *fiber.Ctx, company entity.Company) error {
 	})
 }
 
-// CompanyListResponse formats a response for a list of companys
-func CompanyListResponse(c *fiber.Ctx, companys []entity.Company, total, totalPages int) error {
-	formattedCompanys := make([]map[string]interface{}, 0)
-	for _, company := range companys {
-		formattedCompanys = append(formattedCompanys, FormatCompanyDetails(company))
+// CompanyListResponse formats a response for a list of company
+func CompanyListResponse(c *fiber.Ctx, company []entity.Company, total, totalPages int) error {
+	formattedCompany := make([]map[string]interface{}, 0)
+	for _, company := range company {
+		formattedCompany = append(formattedCompany, FormatCompanyDetails(company))
 	}
 	return c.JSON(fiber.Map{
 		"success":    true,
-		"items":      formattedCompanys,
+		"items":      formattedCompany,
 		"total":      total,
 		"totalPages": totalPages,
 	})

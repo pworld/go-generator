@@ -1,10 +1,10 @@
 package templateMVC
 
-const ViewsTemplate = `package views
+const CompanyViewsTemplate = `package views
 
 import (
-    "github.com/gofiber/fiber/v2"
-    "{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
+	"github.com/gofiber/fiber/v2"
+	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
 )
 
 // Format{{.StructName}}Details formats the {{.LowerStructName}} data for the response
@@ -19,11 +19,11 @@ func Format{{.StructName}}Details({{.LowerStructName}} entity.{{.StructName}}) m
 
 // {{.StructName}}Response formats a successful {{.LowerStructName}}-related response
 func {{.StructName}}Response(c *fiber.Ctx, {{.LowerStructName}} entity.{{.StructName}}) error {
-    formatted{{.StructName}} := Format{{.StructName}}Details({{.LowerStructName}})
-    return c.JSON(fiber.Map{
-        "success": true,
-        "{{.LowerStructName}}": formatted{{.StructName}},
-    })
+	formatted{{.StructName}} := Format{{.StructName}}Details({{.LowerStructName}})
+	return c.JSON(fiber.Map{
+		"success": true,
+		"{{.LowerStructName}}": formatted{{.StructName}},
+	})
 }
 
 // {{.StructName}}ListResponse formats a response for a list of {{.LowerStructName}}

@@ -30,9 +30,14 @@ func writeViewFileContent(filePath, structName, moduleName string, fields []Stru
 		loggers.Error(fmt.Sprintf("Failed to create view file: %s\n", err))
 		return
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			loggers.Error(fmt.Sprintf("Failed to close view file: %s\n", cerr))
+		}
+	}()
 
-	tmpl, err := template.New("view").Parse(templateMVC.ViewsTemplate)
+	// Use the new CompanyViewsTemplate
+	tmpl, err := template.New("view").Parse(templateMVC.CompanyViewsTemplate)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Error creating view template: %s\n", err))
 		return

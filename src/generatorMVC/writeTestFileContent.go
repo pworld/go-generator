@@ -10,21 +10,19 @@ import (
 	"text/template"
 )
 
-// Generates the test file based on the struct name
 func writeTestFileContent(filePath, structName, moduleName string, fields []StructField) {
 	lowerStructName := strings.ToLower(structName)
 
-	// Correctly calculate the base directory from filePath
-	entityDir := filepath.Dir(filePath)
-	modelsDir := filepath.Dir(entityDir)
-	baseDir := filepath.Dir(modelsDir)
+	// Calculate the base directory from filePath
+	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath)))
 	packageName := filepath.Base(baseDir)
 
-	testsDir := filepath.Join(baseDir, "tests/service_tests")
-	testsFileName := fmt.Sprintf("%s_service_test.go", lowerStructName)
+	// Directory and file for the tests
+	testsDir := filepath.Join(baseDir, "tests", lowerStructName+"_tests")
+	testsFileName := fmt.Sprintf("%s_test.go", lowerStructName)
 	testsFilePath := filepath.Join(testsDir, testsFileName)
 
-	// Ensure the directory exists
+	// Ensure the test directory exists
 	if err := os.MkdirAll(testsDir, os.ModePerm); err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create tests directory: %s\n", err))
 		return
@@ -35,37 +33,32 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 		loggers.Error(fmt.Sprintf("Failed to create test file: %s\n", err))
 		return
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			loggers.Error(fmt.Sprintf("Failed test defer file: %s\n", err))
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			loggers.Error(fmt.Sprintf("Failed to close test file: %s\n", cerr))
 		}
-	}(file)
+	}()
 
-	// Execute the template with the struct data
-	tmpl, err := template.New("test").Parse(templateMVC.TestTemplate)
-	if err != nil {
-		loggers.Error(fmt.Sprintf("Error creating test template: %s\n", err))
-		return
-	}
-
-	// Prepare template data
+	// Data for template execution
 	data := struct {
 		ModuleName      string
 		StructName      string
 		LowerStructName string
-		PackagePath     string
-		Fields          []StructField
-		Methods         []Method
 		PackageName     string
+		Fields          []StructField
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
 		LowerStructName: lowerStructName,
-		PackagePath:     lowerStructName,
-		Fields:          fields,
-		Methods:         GenerateCRUDTestMethods(structName),
 		PackageName:     packageName,
+		Fields:          fields,
+	}
+
+	// Parse and execute the template
+	tmpl, err := template.New("test").Parse(templateMVC.TestTemplate)
+	if err != nil {
+		loggers.Error(fmt.Sprintf("Error creating test template: %s\n", err))
+		return
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {
@@ -74,63 +67,4 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 	}
 
 	fmt.Println("Test file generated:", testsFilePath)
-}
-
-// GenerateCRUDMethods generates a slice of Method structs for standard CRUD operations
-func GenerateCRUDTestMethods(structName string) []Method {
-	lowerStructName := strings.ToLower(structName)
-
-	return []Method{
-		{
-			Name:      "Create" + structName,
-			SetupMock: fmt.Sprintf(`mockRepo.On("Create%s", mock.Anything, mock.AnythingOfType("entity.%s")).Return(1, nil)`, structName, structName),
-			TestImplementation: fmt.Sprintf(`
-    mock%s := entity.%s{
-        // Fill The test case
-    }
-    %sID, err := svc.Create%s(context.Background(), mock%s)`, structName, structName, lowerStructName, structName, structName),
-			Assertions: fmt.Sprintf(`
-    assert.NoError(t, err)
-    assert.Equal(t, 1, %sID)`, lowerStructName),
-		},
-		{
-			Name: "Delete" + structName,
-			SetupMock: fmt.Sprintf(`test%sID := 1
-mockRepo.On("Delete%s", mock.Anything, test%sID).Return(nil)`, structName, structName, structName),
-			TestImplementation: fmt.Sprintf(`
-	err := svc.Delete%s(context.Background(), test%sID)`, structName, structName),
-			Assertions: `
-	assert.NoError(t, err)`,
-		},
-		{
-			Name: "Get" + structName,
-			SetupMock: fmt.Sprintf(`test%sID := 1
-			mock%s := entity.%s{
-        		// Fill The test case
-    		}
-			mockRepo.On("Get%sByID", mock.Anything, test%sID).Return(mock%s, nil)`, structName, structName, structName, structName, structName, structName),
-			TestImplementation: fmt.Sprintf(`
-	%s, err := svc.Get%s(context.Background(), test%sID)`, lowerStructName, structName, structName),
-			Assertions: fmt.Sprintf(`
-	assert.NoError(t, err)
-	assert.Equal(t, mock%s, %s)`, structName, lowerStructName),
-		},
-		{
-			Name: "List" + structName,
-			SetupMock: fmt.Sprintf(`
-	page, pageSize, totalData := 1, 10, 2
-    mock%s := []entity.%s{
-        // Fill The test case
-    }
-	mockRepo.On("List%s", mock.Anything, page, pageSize, "", mock.Anything).Return(mock%s, nil)
-    mockRepo.On("Total%s", mock.Anything, "", mock.Anything).Return(totalData, nil)`, structName, structName, structName, structName, structName),
-			TestImplementation: fmt.Sprintf(`
-    %s, total, err := svc.List%s(context.Background(), page, pageSize, "", nil)`, lowerStructName, structName),
-			Assertions: fmt.Sprintf(`
-    assert.NoError(t, err)
-    assert.Equal(t, totalData, total)
-    assert.Len(t, %s, len(mock%s))
-    assert.Equal(t, mock%s, %s)`, lowerStructName, structName, structName, lowerStructName),
-		},
-	}
 }

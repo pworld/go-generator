@@ -23,6 +23,7 @@ type StructField struct {
 	Name    string
 	Type    string
 	JsonTag string
+	Value   any
 }
 
 type Method struct {
@@ -62,7 +63,6 @@ func GenerateMVC(filePath string) {
 // Parses the provided Go file and extracts the struct name
 // parseFileForStruct extracts the struct name and its fields from a Go file
 func parseFileForStruct(filePath string) (string, []StructField, error) {
-	// Read the file
 	fileSet := token.NewFileSet()
 	node, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)
 	if err != nil {
@@ -71,14 +71,26 @@ func parseFileForStruct(filePath string) (string, []StructField, error) {
 
 	var structName string
 	var fields []StructField
+
 	ast.Inspect(node, func(n ast.Node) bool {
 		if ts, ok := n.(*ast.TypeSpec); ok {
 			if structType, ok := ts.Type.(*ast.StructType); ok {
 				structName = ts.Name.Name
 				for _, field := range structType.Fields.List {
 					fieldType := fmt.Sprintf("%v", field.Type)
+
+					// Skip if not int or string
+					if fieldType != "int" && fieldType != "string" {
+						continue
+					}
+
 					for _, fieldName := range field.Names {
-						fields = append(fields, StructField{Name: fieldName.Name, Type: fieldType, JsonTag: strings.ToLower(fieldName.Name)})
+						fields = append(fields, StructField{
+							Name:    fieldName.Name,
+							Type:    fieldType,
+							JsonTag: strings.ToLower(fieldName.Name),
+							Value:   getZeroValue(fieldType),
+						})
 					}
 				}
 				return false
@@ -92,6 +104,22 @@ func parseFileForStruct(filePath string) (string, []StructField, error) {
 	}
 
 	return structName, fields, nil
+}
+
+// getZeroValue returns a string representation of the zero value for the given type
+func getZeroValue(fieldType string) string {
+	switch fieldType {
+	case "int", "int32", "int64":
+		return "0"
+	case "string":
+		return `""`
+	case "time.Time":
+		return "time.Time{}"
+	case "*time.Time": // Assuming it's a pointer to time.Time
+		return "nil"
+	default:
+		return "nil" // You might need to handle more types as per your use case
+	}
 }
 
 func getModuleName(modFilePath string) (string, error) {

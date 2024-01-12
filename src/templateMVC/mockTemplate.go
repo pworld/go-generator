@@ -44,8 +44,8 @@ func (m *Mock{{.StructName}}Repository) List{{.StructName}}(ctx context.Context,
 }
 
 // Total{{.StructName}} mocks the Total{{.StructName}} method
-func (m *Mock{{.StructName}}Repository) Total{{.StructName}}(ctx context.Context, search string, filters map[string]interface{}) (int, error) {
+func (m *Mock{{.StructName}}Repository) Total{{.StructName}}(ctx context.Context, search string, filters map[string]interface{}) (int64, error) {
 	args := m.Called(ctx, search, filters)
-	return args.Int(0), args.Error(1)
+	return int64(args.Int(0)), args.Error(1)
 }
 `

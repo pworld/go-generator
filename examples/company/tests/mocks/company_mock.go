@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"context"
-	"github.com/pworld/go-generator/examples/internal/user/models/entity"
+	"github.com/pworld/go-generator/examples/company/models/entity"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -35,14 +35,14 @@ func (m *MockCompanyRepository) DeleteCompany(ctx context.Context, id int) error
 	return args.Error(0)
 }
 
-// ListCompanys mocks the ListCompanys method
-func (m *MockCompanyRepository) ListCompanys(ctx context.Context, page, pageSize int, search string, filters map[string]interface{}) ([]entity.Company, error) {
+// ListCompany mocks the ListCompany method
+func (m *MockCompanyRepository) ListCompany(ctx context.Context, page, pageSize int, search string, filters map[string]interface{}) ([]entity.Company, error) {
 	args := m.Called(ctx, page, pageSize, search, filters)
 	return args.Get(0).([]entity.Company), args.Error(1)
 }
 
-// TotalCompanys mocks the TotalCompanys method
-func (m *MockCompanyRepository) TotalCompanys(ctx context.Context, search string, filters map[string]interface{}) (int, error) {
+// TotalCompany mocks the TotalCompany method
+func (m *MockCompanyRepository) TotalCompany(ctx context.Context, search string, filters map[string]interface{}) (int64, error) {
 	args := m.Called(ctx, search, filters)
-	return args.Int(0), args.Error(1)
+	return int64(args.Int(0)), args.Error(1)
 }

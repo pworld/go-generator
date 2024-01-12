@@ -12,18 +12,13 @@ import (
 
 func writeRepositoryFileContent(filePath, structName, moduleName string, fields []StructField) {
 	lowerStructName := strings.ToLower(structName)
+	baseDir := filepath.Dir(filepath.Dir(filePath)) // This should get you to "internal/company/models"
 
-	// Correctly calculate the base directory from filePath
-	entityDir := filepath.Dir(filePath)
-	modelsDir := filepath.Dir(entityDir)
-	baseDir := filepath.Dir(modelsDir)
-	packageName := filepath.Base(baseDir)
-
-	repositoryDir := filepath.Join(baseDir, "models/repository")
+	// Construct the repository directory path
+	repositoryDir := filepath.Join(baseDir, "repository") // This should result in "internal/company/models/repository"
 	repositoryFileName := fmt.Sprintf("%s_repository.go", lowerStructName)
 	repositoryFilePath := filepath.Join(repositoryDir, repositoryFileName)
 
-	// Ensure the directory exists
 	if err := os.MkdirAll(repositoryDir, os.ModePerm); err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create repository directory: %s\n", err))
 		return
@@ -36,115 +31,27 @@ func writeRepositoryFileContent(filePath, structName, moduleName string, fields 
 	}
 	defer file.Close()
 
+	data := struct {
+		ModuleName      string
+		StructName      string
+		LowerStructName string
+		PackageName     string
+	}{
+		ModuleName:      moduleName,
+		StructName:      structName,
+		LowerStructName: lowerStructName,
+		PackageName:     filepath.Base(filepath.Dir(filepath.Dir(repositoryDir))),
+	}
+
 	tmpl, err := template.New("repository").Parse(templateMVC.RepositoryTemplate)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Error creating repository template: %s\n", err))
 		return
 	}
-
-	fieldNames, placeholders := buildQueryParts(structName, fields)
-	query := "INSERT INTO " + structName + " (" + fieldNames + ") VALUES (" + placeholders + ") RETURNING id;"
-
-	// Generate argument list as a string
-	var argumentParts []string
-	for _, field := range fields {
-		argumentParts = append(argumentParts, lowerStructName+"."+field.Name)
-	}
-	argumentList := strings.Join(argumentParts, ", ")
-	scanFields := generateScanFields(lowerStructName, fields)
-
-	// generateUpdateQuery
-	updateFields := generateUpdateFields(fields)
-	scanFieldsUpdate := generateUpdateArguments(lowerStructName, fields)
-	scanFieldsListsUpdate := generateListArguments(lowerStructName, fields)
-
-	// Before executing the template
-	fmt.Printf("Debug - scanFieldsUpdate: %s\n", scanFieldsUpdate)
-
-	// Prepare data for the template
-	data := struct {
-		ModuleName            string
-		StructName            string
-		LowerStructName       string
-		TableName             string
-		Query                 string
-		UpdateFields          string
-		ArgumentList          string
-		ScanFields            string
-		ScanFieldsUpdate      string
-		ScanFieldsListsUpdate string
-		PackageName           string
-	}{
-		ModuleName:            moduleName,
-		StructName:            structName,
-		LowerStructName:       strings.ToLower(structName),
-		TableName:             structName,
-		Query:                 query,
-		UpdateFields:          updateFields,
-		ArgumentList:          argumentList,
-		ScanFields:            scanFields,
-		ScanFieldsUpdate:      scanFieldsUpdate,
-		ScanFieldsListsUpdate: scanFieldsListsUpdate,
-		PackageName:           packageName,
-	}
-
 	if err := tmpl.Execute(file, data); err != nil {
 		loggers.Error(fmt.Sprintf("Error executing repository template: %s\n", err))
 		return
 	}
 
 	fmt.Println("Repository file generated:", repositoryFilePath)
-}
-
-// buildQueryParts creates lists of field names and placeholders for an SQL query
-func buildQueryParts(structName string, fields []StructField) (string, string) {
-	var fieldNames, placeholders []string
-
-	for _, field := range fields {
-		fieldNames = append(fieldNames, field.Name)
-		placeholders = append(placeholders, "?") // Using "?" as a placeholder
-	}
-
-	return strings.Join(fieldNames, ", "), strings.Join(placeholders, ", ")
-}
-
-// getStructFieldValues returns the values of all fields in a struct as a slice of interfaces.
-func generateScanFields(structName string, fields []StructField) string {
-	var scanFields []string
-	for _, field := range fields {
-		scanFields = append(scanFields, "&"+structName+"."+field.Name)
-	}
-	return strings.Join(scanFields, ", ")
-}
-
-func generateUpdateFields(fields []StructField) string {
-	var setParts []string
-	for _, field := range fields {
-		if field.Name != "ID" { // Skip "ID" or any other fields you don't want to update
-			setParts = append(setParts, fmt.Sprintf("%s = ?", field.Name))
-		}
-	}
-	return strings.Join(setParts, ", ")
-}
-
-func generateUpdateArguments(structName string, fields []StructField) string {
-	var argumentParts []string
-	for _, field := range fields {
-		if field.Name != "ID" { // Include all fields except ID for update
-			argumentParts = append(argumentParts, structName+"."+field.Name)
-		}
-	}
-	argumentParts = append(argumentParts, structName+".ID") // Add ID at the end for WHERE clause
-	return strings.Join(argumentParts, ", ")
-}
-
-func generateListArguments(structName string, fields []StructField) string {
-	var argumentParts []string
-	for _, field := range fields {
-		if field.Name != "ID" { // Include all fields except ID for update
-			argumentParts = append(argumentParts, "&"+structName+"."+field.Name)
-		}
-	}
-	argumentParts = append(argumentParts, structName+".ID") // Add ID at the end for WHERE clause
-	return strings.Join(argumentParts, ", ")
 }

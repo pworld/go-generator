@@ -3,16 +3,12 @@ package templateMVC
 const ControllerTemplate = `package controllers
 
 import (
-	"database/sql"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/go-playground/validator/v10"
-	"{{.ModuleName}}/helper"
 	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
 	"{{.ModuleName}}/internal/{{.PackageName}}/models/repository"
 	"{{.ModuleName}}/internal/{{.PackageName}}/services"
 	"{{.ModuleName}}/internal/{{.PackageName}}/views"
-	"github.com/pworld/loggers"
+	"gorm.io/gorm"
 	"math"
 	"strconv"
 	"time"
@@ -23,10 +19,8 @@ type {{.StructName}}Controller struct {
 	{{.LowerStructName}}Service services.{{.StructName}}Service
 }
 
-// validator instance
-var validate = validator.New()
-
-func New{{.StructName}}Controller(db *sql.DB) *{{.StructName}}Controller {
+// New{{.StructName}}Controller creates a new instance of {{.StructName}}Controller
+func New{{.StructName}}Controller(db *gorm.DB) *{{.StructName}}Controller {
 	{{.LowerStructName}}Repo := repository.New{{.StructName}}Repository(db)
 	{{.LowerStructName}}Service := services.New{{.StructName}}Service({{.LowerStructName}}Repo)
 	return &{{.StructName}}Controller{
@@ -34,8 +28,8 @@ func New{{.StructName}}Controller(db *sql.DB) *{{.StructName}}Controller {
 	}
 }
 
-// CreateUser creates a new {{.LowerStructName}}
-func (uc *{{.StructName}}Controller) CreateUser(c *fiber.Ctx) error {
+// Create{{.StructName}} creates a new {{.LowerStructName}}
+func (uc *{{.StructName}}Controller) Create{{.StructName}}(c *fiber.Ctx) error {
 	var {{.LowerStructName}} entity.{{.StructName}}
 	if err := parseAndValidate(c, &{{.LowerStructName}}); err != nil {
 		loggers.Error("Error parsing request body:", err)
@@ -52,8 +46,8 @@ func (uc *{{.StructName}}Controller) CreateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON({{.LowerStructName}})
 }
 
-// GetUser retrieves a {{.LowerStructName}} by ID
-func (uc *{{.StructName}}Controller) GetUser(c *fiber.Ctx) error {
+// Get{{.StructName}} retrieves a {{.LowerStructName}} by ID
+func (uc *{{.StructName}}Controller) Get{{.StructName}}(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid {{.LowerStructName}} ID"})

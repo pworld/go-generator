@@ -10,37 +10,55 @@ import (
 	"text/template"
 )
 
-func writeControllerFileContent(filePath, structName, moduleName string, fields []StructField) {
-	lowerStructName := strings.ToLower(structName)
-
-	// Calculate the directory path for the controller
-	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath))) // Move two directories up
-	fmt.Print(baseDir)
-	packageName := filepath.Base(baseDir)
+// createControllerDirectory ensures the controller directory exists.
+func createControllerDirectory(baseDir string) (string, error) {
 	controllerDir := filepath.Join(baseDir, "controllers")
-	controllerFileName := fmt.Sprintf("%s_controller.go", lowerStructName)
-	controllerFilePath := filepath.Join(controllerDir, controllerFileName)
-
-	// Ensure the directory exists
 	if err := os.MkdirAll(controllerDir, os.ModePerm); err != nil {
-		loggers.Error(fmt.Sprintf("Failed to create controller directory: %s\n", err))
-		return
+		return "", fmt.Errorf("failed to create controller directory: %w", err)
+	}
+	return controllerDir, nil
+}
+
+// executeTemplate executes the given template with provided data.
+func executeTemplate(data interface{}, file *os.File) error {
+	tmpl, err := template.New("controller").Parse(templateMVC.ControllerTemplate)
+	if err != nil {
+		return fmt.Errorf("error creating controller template: %w", err)
 	}
 
+	if err := tmpl.Execute(file, data); err != nil {
+		return fmt.Errorf("error executing controller template: %w", err)
+	}
+
+	return nil
+}
+
+// writeControllerFileContent creates a controller file based on the provided information.
+func writeControllerFileContent(filePath, structName, moduleName string, fields []StructField) error {
+	lowerStructName := strings.ToLower(structName)
+
+	// Calculate the base directory
+	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath)))
+	packageName := filepath.Base(baseDir)
+
+	// Create controller directory
+	controllerDir, err := createControllerDirectory(baseDir)
+	if err != nil {
+		loggers.Error(err.Error())
+		return err
+	}
+
+	// Create controller file
+	controllerFileName := fmt.Sprintf("%s_controller.go", lowerStructName)
+	controllerFilePath := filepath.Join(controllerDir, controllerFileName)
 	file, err := os.Create(controllerFilePath)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create controller file: %s\n", err))
-		return
+		return err
 	}
 	defer file.Close()
 
-	// Execute the template with the struct data
-	tmpl, err := template.New("controller").Parse(templateMVC.ControllerTemplate)
-	if err != nil {
-		loggers.Error(fmt.Sprintf("Error creating controller template: %s\n", err))
-		return
-	}
-
+	// Data for template execution
 	data := struct {
 		ModuleName      string
 		StructName      string
@@ -50,15 +68,17 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
-		LowerStructName: lowerStructName,
+		LowerStructName: strings.ToLower(structName),
 		PackageName:     packageName,
 		Fields:          fields,
 	}
 
-	if err := tmpl.Execute(file, data); err != nil {
-		loggers.Error(fmt.Sprintf("Error executing controller template: %s\n", err))
-		return
+	// Execute the template with the struct data
+	if err := executeTemplate(data, file); err != nil {
+		loggers.Error(err.Error())
+		return err
 	}
 
 	fmt.Println("Controller file generated:", controllerFilePath)
+	return nil
 }
