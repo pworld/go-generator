@@ -10,24 +10,23 @@ import (
 	"text/template"
 )
 
-func writeRepositoryFileContent(filePath, structName, moduleName string, fields []StructField) {
+func writeRepositoryFileContent(filePath, structName, modulePath, baseDir, moduleName string, fields []StructField) error {
 	lowerStructName := strings.ToLower(structName)
-	baseDir := filepath.Dir(filepath.Dir(filePath)) // This should get you to "internal/company/models"
 
 	// Construct the repository directory path
-	repositoryDir := filepath.Join(baseDir, "repository") // This should result in "internal/company/models/repository"
+	repositoryDir := filepath.Join(baseDir, "models", "repository")
 	repositoryFileName := fmt.Sprintf("%s_repository.go", lowerStructName)
 	repositoryFilePath := filepath.Join(repositoryDir, repositoryFileName)
 
 	if err := os.MkdirAll(repositoryDir, os.ModePerm); err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create repository directory: %s\n", err))
-		return
+		return err
 	}
 
 	file, err := os.Create(repositoryFilePath)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create repository file: %s\n", err))
-		return
+		return err
 	}
 	defer file.Close()
 
@@ -35,23 +34,24 @@ func writeRepositoryFileContent(filePath, structName, moduleName string, fields 
 		ModuleName      string
 		StructName      string
 		LowerStructName string
-		PackageName     string
+		ModulePath      string
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
 		LowerStructName: lowerStructName,
-		PackageName:     filepath.Base(filepath.Dir(filepath.Dir(repositoryDir))),
+		ModulePath:      modulePath,
 	}
 
 	tmpl, err := template.New("repository").Parse(templateMVC.RepositoryTemplate)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Error creating repository template: %s\n", err))
-		return
+		return err
 	}
 	if err := tmpl.Execute(file, data); err != nil {
 		loggers.Error(fmt.Sprintf("Error executing repository template: %s\n", err))
-		return
+		return err
 	}
 
 	fmt.Println("Repository file generated:", repositoryFilePath)
+	return nil
 }

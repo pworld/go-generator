@@ -10,10 +10,9 @@ import (
 	"text/template"
 )
 
-func writeServiceFileContent(filePath, structName, moduleName string, fields []StructField) {
+func writeServiceFileContent(filePath, structName, modulePath, baseDir, moduleName string, fields []StructField) error {
 	lowerStructName := strings.ToLower(structName)
-	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath)))
-	packageName := filepath.Base(baseDir)
+
 	servicesDir := filepath.Join(baseDir, "services")
 	serviceFileName := fmt.Sprintf("%s_service.go", lowerStructName)
 	serviceFilePath := filepath.Join(servicesDir, serviceFileName)
@@ -21,20 +20,20 @@ func writeServiceFileContent(filePath, structName, moduleName string, fields []S
 	// Ensure the directory exists
 	if err := os.MkdirAll(servicesDir, os.ModePerm); err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create services directory: %s\n", err))
-		return
+		return err
 	}
 
 	file, err := os.Create(serviceFilePath)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create service file: %s\n", err))
-		return
+		return err
 	}
 	defer file.Close()
 
 	tmpl, err := template.New("service").Parse(templateMVC.ServiceTemplate)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Error creating service template: %s\n", err))
-		return
+		return err
 	}
 
 	data := struct {
@@ -42,17 +41,19 @@ func writeServiceFileContent(filePath, structName, moduleName string, fields []S
 		StructName      string
 		LowerStructName string
 		PackageName     string
+		ModulePath      string
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
 		LowerStructName: lowerStructName,
-		PackageName:     packageName,
+		ModulePath:      modulePath,
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {
 		loggers.Error(fmt.Sprintf("Error executing service template: %s\n", err))
-		return
+		return err
 	}
 
 	fmt.Println("Service file generated:", serviceFilePath)
+	return nil
 }

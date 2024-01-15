@@ -4,7 +4,7 @@ const MockTemplate = `package mocks
 
 import (
 	"context"
-	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
+	"{{.ModulePath}}/models/entity"
 	"github.com/stretchr/testify/mock"
 )
 

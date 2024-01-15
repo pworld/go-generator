@@ -11,24 +11,23 @@ import (
 	"github.com/pworld/loggers"
 )
 
-func writeViewFileContent(filePath, structName, moduleName string, fields []StructField) {
+func writeViewFileContent(filePath, structName, modulePath, baseDir, moduleName string, fields []StructField) error {
 	lowerStructName := strings.ToLower(structName)
-	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath))) // Move two directories up
+
 	viewsDir := filepath.Join(baseDir, "views")
 	viewFileName := fmt.Sprintf("%s_view.go", lowerStructName)
 	viewFilePath := filepath.Join(viewsDir, viewFileName)
-	packageName := filepath.Base(baseDir)
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(viewsDir, os.ModePerm); err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create views directory: %s\n", err))
-		return
+		return err
 	}
 
 	file, err := os.Create(viewFilePath)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create view file: %s\n", err))
-		return
+		return err
 	}
 	defer func() {
 		if cerr := file.Close(); cerr != nil {
@@ -40,7 +39,7 @@ func writeViewFileContent(filePath, structName, moduleName string, fields []Stru
 	tmpl, err := template.New("view").Parse(templateMVC.CompanyViewsTemplate)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Error creating view template: %s\n", err))
-		return
+		return err
 	}
 
 	data := struct {
@@ -49,20 +48,21 @@ func writeViewFileContent(filePath, structName, moduleName string, fields []Stru
 		LowerStructName string
 		PackagePath     string
 		Fields          []StructField
-		PackageName     string
+		ModulePath      string
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
 		LowerStructName: lowerStructName,
 		PackagePath:     lowerStructName,
 		Fields:          fields,
-		PackageName:     packageName,
+		ModulePath:      modulePath,
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {
 		loggers.Error(fmt.Sprintf("Error executing view template: %s\n", err))
-		return
+		return err
 	}
 
 	fmt.Println("View file generated:", viewFilePath)
+	return nil
 }

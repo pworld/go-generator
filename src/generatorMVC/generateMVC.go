@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -40,24 +41,30 @@ func GenerateMVC(filePath string) {
 		loggers.Error(fmt.Sprintf("Failed to parse file for struct: %s\n", err))
 		return
 	}
+	pathUpToModels, err := getPathUp(filePath)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
 	moduleName, err := getModuleName("go.mod")
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Failed to get the module name: %s\n", err))
 		return
 	}
+	modulePath := moduleName + "/" + pathUpToModels
+
 	loggers.Info(fmt.Sprintf("fields: %s\n", fields))
 	// Generate the controller file
-	writeControllerFileContent(filePath, structName, moduleName, fields)
+	writeControllerFileContent(filePath, structName, modulePath, pathUpToModels, moduleName, fields)
 	// Generate the Service file
-	writeServiceFileContent(filePath, structName, moduleName, fields)
+	writeServiceFileContent(filePath, structName, modulePath, pathUpToModels, moduleName, fields)
 	// Generate the Repository file
-	writeRepositoryFileContent(filePath, structName, moduleName, fields)
+	writeRepositoryFileContent(filePath, structName, modulePath, pathUpToModels, moduleName, fields)
 	// Generate the View file
-	writeViewFileContent(filePath, structName, moduleName, fields)
+	writeViewFileContent(filePath, structName, modulePath, pathUpToModels, moduleName, fields)
 	// Generate the Test file
-	writeTestFileContent(filePath, structName, moduleName, fields)
+	writeTestFileContent(filePath, structName, modulePath, pathUpToModels, moduleName, fields)
 	// Generate the Mock file
-	writeMockFileContent(filePath, structName, moduleName, fields)
+	writeMockFileContent(filePath, structName, modulePath, pathUpToModels, moduleName, fields)
 }
 
 // Parses the provided Go file and extracts the struct name
@@ -144,4 +151,23 @@ func getModuleName(modFilePath string) (string, error) {
 	}
 
 	return "", fmt.Errorf("module directive not found in %s", modFilePath)
+}
+
+// getPathUp extracts the directory path up to but excluding the "models" directory from a given file path.
+func getPathUp(filePath string) (string, error) {
+	// Split the filePath into its components.
+	pathComponents := strings.Split(filePath, string(filepath.Separator))
+
+	// Traverse the path components to find the "models" directory.
+	for i, component := range pathComponents {
+		if component == "models" {
+			// Join the components up to but excluding "models".
+			if i == 0 {
+				return "", fmt.Errorf("the 'models' directory is at the root of the path")
+			}
+			return filepath.Join(pathComponents[:i]...), nil
+		}
+	}
+
+	return "", fmt.Errorf("the path does not contain a 'models' directory")
 }

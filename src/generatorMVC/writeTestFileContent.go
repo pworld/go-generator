@@ -10,12 +10,8 @@ import (
 	"text/template"
 )
 
-func writeTestFileContent(filePath, structName, moduleName string, fields []StructField) {
+func writeTestFileContent(filePath, structName, modulePath, baseDir, moduleName string, fields []StructField) error {
 	lowerStructName := strings.ToLower(structName)
-
-	// Calculate the base directory from filePath
-	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath)))
-	packageName := filepath.Base(baseDir)
 
 	// Directory and file for the tests
 	testsDir := filepath.Join(baseDir, "tests", lowerStructName+"_tests")
@@ -25,13 +21,13 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 	// Ensure the test directory exists
 	if err := os.MkdirAll(testsDir, os.ModePerm); err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create tests directory: %s\n", err))
-		return
+		return err
 	}
 
 	file, err := os.Create(testsFilePath)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Failed to create test file: %s\n", err))
-		return
+		return err
 	}
 	defer func() {
 		if cerr := file.Close(); cerr != nil {
@@ -44,13 +40,13 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 		ModuleName      string
 		StructName      string
 		LowerStructName string
-		PackageName     string
+		ModulePath      string
 		Fields          []StructField
 	}{
 		ModuleName:      moduleName,
 		StructName:      structName,
 		LowerStructName: lowerStructName,
-		PackageName:     packageName,
+		ModulePath:      modulePath,
 		Fields:          fields,
 	}
 
@@ -58,13 +54,14 @@ func writeTestFileContent(filePath, structName, moduleName string, fields []Stru
 	tmpl, err := template.New("test").Parse(templateMVC.TestTemplate)
 	if err != nil {
 		loggers.Error(fmt.Sprintf("Error creating test template: %s\n", err))
-		return
+		return err
 	}
 
 	if err := tmpl.Execute(file, data); err != nil {
 		loggers.Error(fmt.Sprintf("Error executing test template: %s\n", err))
-		return
+		return err
 	}
 
 	fmt.Println("Test file generated:", testsFilePath)
+	return nil
 }

@@ -5,8 +5,8 @@ const ServiceTemplate = `package services
 import (
 	"context"
 	"fmt"
-	"github.com/pworld/go-mvc-boilerplate/internal/{{.PackageName}}/models/entity"
-	"github.com/pworld/go-mvc-boilerplate/internal/{{.PackageName}}/models/repository"
+	"{{.ModulePath}}/models/entity"
+	"{{.ModulePath}}/models/repository"
 	"github.com/pworld/loggers"
 )
 

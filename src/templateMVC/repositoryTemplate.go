@@ -4,8 +4,8 @@ const RepositoryTemplate = `package repository
 
 import (
 	"context"
-	"github.com/pworld/go-mvc-boilerplate/helper"
-	"github.com/pworld/go-mvc-boilerplate/internal/{{.PackageName}}/models/entity"
+	"{{.ModuleName}}/helper"
+	"{{.ModulePath}}/models/entity"
 	"gorm.io/gorm"
 )
 

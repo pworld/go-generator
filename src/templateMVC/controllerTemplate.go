@@ -4,10 +4,12 @@ const ControllerTemplate = `package controllers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
-	"{{.ModuleName}}/internal/{{.PackageName}}/models/repository"
-	"{{.ModuleName}}/internal/{{.PackageName}}/services"
-	"{{.ModuleName}}/internal/{{.PackageName}}/views"
+	"{{.ModuleName}}/helper"
+	"{{.ModulePath}}/models/entity"
+	"{{.ModulePath}}/models/repository"
+	"{{.ModulePath}}/services"
+	"{{.ModulePath}}/views"
+	"github.com/pworld/loggers"
 	"gorm.io/gorm"
 	"math"
 	"strconv"
@@ -31,9 +33,9 @@ func New{{.StructName}}Controller(db *gorm.DB) *{{.StructName}}Controller {
 // Create{{.StructName}} creates a new {{.LowerStructName}}
 func (uc *{{.StructName}}Controller) Create{{.StructName}}(c *fiber.Ctx) error {
 	var {{.LowerStructName}} entity.{{.StructName}}
-	if err := parseAndValidate(c, &{{.LowerStructName}}); err != nil {
+	if err := helper.ParseAndValidate(c, &{{.LowerStructName}}); err != nil {
 		loggers.Error("Error parsing request body:", err)
-		return handleValidationError(c, err)
+		return helper.HandleValidationError(c, err)
 	}
 
 	{{.LowerStructName}}.CreatedAt = time.Now()
@@ -68,8 +70,8 @@ func (uc *{{.StructName}}Controller) Update{{.StructName}}(c *fiber.Ctx) error {
 	}
 	
 	var {{.LowerStructName}} entity.{{.StructName}}
-	if err := parseAndValidate(c, &{{.LowerStructName}}); err != nil {
-		return handleValidationError(c, err)
+	if err := helper.ParseAndValidate(c, &{{.LowerStructName}}); err != nil {
+		return helper.HandleValidationError(c, err)
 	}
 
 	{{.LowerStructName}}.ID = id

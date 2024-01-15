@@ -34,12 +34,8 @@ func executeTemplate(data interface{}, file *os.File) error {
 }
 
 // writeControllerFileContent creates a controller file based on the provided information.
-func writeControllerFileContent(filePath, structName, moduleName string, fields []StructField) error {
+func writeControllerFileContent(filePath, structName, modulePath, baseDir, moduleName string, fields []StructField) error {
 	lowerStructName := strings.ToLower(structName)
-
-	// Calculate the base directory
-	baseDir := filepath.Dir(filepath.Dir(filepath.Dir(filePath)))
-	packageName := filepath.Base(baseDir)
 
 	// Create controller directory
 	controllerDir, err := createControllerDirectory(baseDir)
@@ -61,15 +57,15 @@ func writeControllerFileContent(filePath, structName, moduleName string, fields 
 	// Data for template execution
 	data := struct {
 		ModuleName      string
+		ModulePath      string
 		StructName      string
 		LowerStructName string
-		PackageName     string
 		Fields          []StructField
 	}{
 		ModuleName:      moduleName,
+		ModulePath:      modulePath,
 		StructName:      structName,
 		LowerStructName: strings.ToLower(structName),
-		PackageName:     packageName,
 		Fields:          fields,
 	}
 

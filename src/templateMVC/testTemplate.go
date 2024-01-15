@@ -7,9 +7,9 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"{{.ModuleName}}/internal/{{.PackageName}}/models/entity"
-	"{{.ModuleName}}/internal/{{.PackageName}}/services"
-	"{{.ModuleName}}/internal/{{.PackageName}}/tests/mocks"
+	"{{.ModulePath}}/models/entity"
+	"{{.ModulePath}}/services"
+	"{{.ModulePath}}/tests/mocks"
 )
 
 func TestCreate{{.StructName}}(t *testing.T) {
@@ -81,9 +81,11 @@ func Test{{.StructName}}Lists(t *testing.T) {
 	page, pageSize := 1, 10
 
 	expected{{.StructName}}s := []entity.{{.StructName}}{
-        {{- range .Fields }}
-        {{ .Name }}: {{ .Value }},
-        {{- end }}
+		{
+			{{- range .Fields }}
+			{{ .Name }}: {{ .Value }},
+			{{- end }}
+		}
 	}
 	expectedTotal := int64(len(expected{{.StructName}}s))
 
